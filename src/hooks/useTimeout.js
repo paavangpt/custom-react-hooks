@@ -1,8 +1,13 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
-export default function useTimeout(callback, timeout, resetOnRender = false) {
-    const callbackRef = useRef();
+export default function useTimeout(callback, timeout) {
+
+    const callbackRef = useRef(callback);
     const timeoutRef = useRef();
+
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
 
     const clear = useCallback(() => {
         timeoutRef.current && clearTimeout(timeoutRef.current);
@@ -13,9 +18,7 @@ export default function useTimeout(callback, timeout, resetOnRender = false) {
         timeoutRef.current = setTimeout(callback, timeout);
     }, []);
 
-    if (!resetOnRender && callbackRef.current) return { clear, reset };
-
-    callbackRef.current = callback;
+    if (callbackRef.current) clear();
     timeoutRef.current = setTimeout(callback, timeout);
 
     return { clear, reset };
